@@ -1,21 +1,21 @@
-name: Amnezia updater CI
+name: Amnezia VPN Tunnel Update CI
 
 on:
   push:
     paths:
-      - "tools/amnezia-updater/**"
-      - ".github/workflows/amnezia-updater.yml"
+      - "amnezia-vpn-tunnel-update/**"
+      - ".github/workflows/amnezia-vpn-tunnel-update.yml"
   pull_request:
     paths:
-      - "tools/amnezia-updater/**"
-      - ".github/workflows/amnezia-updater.yml"
+      - "amnezia-vpn-tunnel-update/**"
+      - ".github/workflows/amnezia-vpn-tunnel-update.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: amnezia-updater-${{ github.ref }}
+  group: amnezia-vpn-tunnel-update-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -43,7 +43,7 @@ jobs:
           plugins: qt appimage
 
       - name: Configure
-        run: cmake -S tools/amnezia-updater -B build -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
+        run: cmake -S amnezia-vpn-tunnel-update -B build -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
         run: cmake --build build --config Release --parallel
@@ -57,7 +57,7 @@ jobs:
           QT_QPA_PLATFORM: offscreen
         run: |
           curl -fsSL "https://github.com/lib4u/amnezia-tunneling-ru/releases/download/latest/amnezia.json" -o upstream-amnezia.json
-          ./build/amnezia-list-updater --validate-file upstream-amnezia.json
+          ./build/amnezia-vpn-tunnel-update --validate-file upstream-amnezia.json
 
       - name: Package Linux AppImage
         if: runner.os == 'Linux'
@@ -68,48 +68,48 @@ jobs:
             --plugin=qt \
             --output=appimage \
             --create-desktop-file \
-            --executable=build/amnezia-list-updater \
+            --executable=build/amnezia-vpn-tunnel-update \
             --appdir=AppDir \
-            --icon-file=tools/amnezia-updater/assets/amnezia-list-updater.svg
+            --icon-file=amnezia-vpn-tunnel-update/assets/amnezia-vpn-tunnel-update.svg
           APPIMAGE="$(find . -maxdepth 1 -type f -name '*.AppImage' ! -name 'linuxdeploy*' | head -n 1)"
           test -n "$APPIMAGE"
-          mv "$APPIMAGE" amnezia-list-updater-linux-x86_64.AppImage
+          mv "$APPIMAGE" amnezia-vpn-tunnel-update-linux-x86_64.AppImage
 
       - name: Package Windows portable build
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force package | Out-Null
-          Copy-Item build/Release/amnezia-list-updater.exe package/
-          windeployqt package/amnezia-list-updater.exe --release --no-translations --dir package
+          Copy-Item build/Release/amnezia-vpn-tunnel-update.exe package/
+          windeployqt package/amnezia-vpn-tunnel-update.exe --release --no-translations --dir package
           Get-ChildItem package -Recurse -File |
             ForEach-Object { $_.FullName.Substring((Resolve-Path package).Path.Length + 1).Replace('\','/') } |
             Set-Content package/runtime.manifest
-          Compress-Archive -Path package/* -DestinationPath amnezia-list-updater-windows-x64.zip
+          Compress-Archive -Path package/* -DestinationPath amnezia-vpn-tunnel-update-windows-x64.zip
 
       - name: Package macOS app
         if: runner.os == 'macOS'
         run: |
-          macdeployqt "build/amnezia-list-updater.app" -dmg
-          mv "build/amnezia-list-updater.dmg" amnezia-list-updater-macos.dmg
+          macdeployqt "build/amnezia-vpn-tunnel-update.app" -dmg
+          mv "build/amnezia-vpn-tunnel-update.dmg" amnezia-vpn-tunnel-update-macos.dmg
 
       - name: Upload Windows package
         if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
-          name: amnezia-list-updater-windows-x64
-          path: amnezia-list-updater-windows-x64.zip
+          name: amnezia-vpn-tunnel-update-windows-x64
+          path: amnezia-vpn-tunnel-update-windows-x64.zip
 
       - name: Upload macOS package
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v4
         with:
-          name: amnezia-list-updater-macos
-          path: amnezia-list-updater-macos.dmg
+          name: amnezia-vpn-tunnel-update-macos
+          path: amnezia-vpn-tunnel-update-macos.dmg
 
       - name: Upload Linux package
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
-          name: amnezia-list-updater-linux-x86_64
-          path: amnezia-list-updater-linux-x86_64.AppImage
+          name: amnezia-vpn-tunnel-update-linux-x86_64
+          path: amnezia-vpn-tunnel-update-linux-x86_64.AppImage
