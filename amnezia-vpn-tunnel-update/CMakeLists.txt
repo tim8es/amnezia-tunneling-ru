@@ -20,7 +20,7 @@ add_executable(amnezia-vpn-tunnel-update WIN32 MACOSX_BUNDLE src/main.cpp)
 target_link_libraries(amnezia-vpn-tunnel-update PRIVATE amnezia_tunnel_update_core Qt6::Widgets)
 set_target_properties(amnezia-vpn-tunnel-update PROPERTIES
     MACOSX_BUNDLE_BUNDLE_NAME "Amnezia VPN Tunnel Update"
-    MACOSX_BUNDLE_GUI_IDENTIFIER "org.lib4u.amnezia-vpn-tunnel-update"
+    MACOSX_BUNDLE_GUI_IDENTIFIER "io.github.tim8es.amnezia-vpn-tunnel-update"
 )
 
 include(CTest)
