@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Network Widgets Test)
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Network Widgets)
 
 add_library(amnezia_tunnel_update_core
     src/core.cpp
@@ -25,6 +25,7 @@ set_target_properties(amnezia-vpn-tunnel-update PROPERTIES
 
 include(CTest)
 if(BUILD_TESTING)
+    find_package(Qt6 6.5 REQUIRED COMPONENTS Test)
     add_executable(amnezia-vpn-tunnel-update-tests tests/test_core.cpp)
     target_link_libraries(amnezia-vpn-tunnel-update-tests PRIVATE amnezia_tunnel_update_core Qt6::Test)
     add_test(NAME amnezia-vpn-tunnel-update-tests COMMAND amnezia-vpn-tunnel-update-tests)
