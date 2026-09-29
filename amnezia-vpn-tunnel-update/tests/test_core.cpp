@@ -220,6 +220,44 @@ private slots:
         QVERIFY(!state.sourceSha256.isEmpty());
     }
 
+    void suspiciousShrinkNeverTouchesSettings()
+    {
+        QTemporaryDir temp;
+        QVERIFY(temp.isValid());
+        const QString settingsPath = QDir(temp.path()).filePath(QStringLiteral("amnezia.ini"));
+
+        QVariantMap current;
+        State state;
+        for (int i = 0; i < 120; ++i) {
+            const QString domain = QStringLiteral("managed-%1.example").arg(i);
+            current.insert(domain, QStringList{});
+            state.managedDomains.append(domain);
+        }
+        current.insert(QStringLiteral("personal.example"), QStringList{});
+        initializeSettings(settingsPath, current);
+
+        StateStore store(QDir(temp.path()).filePath(QStringLiteral("state")));
+        QString error;
+        QVERIFY2(store.save(state, error), qPrintable(error));
+
+        QJsonArray tiny;
+        for (int i = 0; i < 10; ++i) {
+            QJsonObject o;
+            o.insert(QStringLiteral("hostname"), QStringLiteral("new-%1.example").arg(i));
+            o.insert(QStringLiteral("ip"), QString());
+            tiny.append(o);
+        }
+
+        AmneziaSettings settings(settingsPath);
+        Updater updater(settings, store);
+        const UpdateResult result =
+            updater.updateFromBytes(QJsonDocument(tiny).toJson(QJsonDocument::Compact), false);
+
+        QCOMPARE(result.status, UpdateStatus::Error);
+        QCOMPARE(settings.exceptSites(), current);
+        QVERIFY(!QDir(store.backupDir()).exists());
+    }
+
     void invalidUpdateNeverTouchesSettings()
     {
         QTemporaryDir temp;
