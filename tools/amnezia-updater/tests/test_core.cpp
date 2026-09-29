@@ -4,6 +4,9 @@
 
 #include <QCryptographicHash>
 #include <QDir>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QFile>
 #include <QSettings>
 #include <QTemporaryDir>
