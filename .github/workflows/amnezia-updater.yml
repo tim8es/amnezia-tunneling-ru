@@ -35,6 +35,13 @@ jobs:
           version: "6.10.3"
           cache: true
 
+      - name: Install LinuxDeploy
+        if: runner.os == 'Linux'
+        id: linuxdeploy
+        uses: miurahr/install-linuxdeploy-action@v1.8.0
+        with:
+          plugins: qt appimage
+
       - name: Configure
         run: cmake -S tools/amnezia-updater -B build -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Release
 
@@ -51,6 +58,22 @@ jobs:
         run: |
           curl -fsSL "https://github.com/lib4u/amnezia-tunneling-ru/releases/download/latest/amnezia.json" -o upstream-amnezia.json
           ./build/amnezia-list-updater --validate-file upstream-amnezia.json
+
+      - name: Package Linux AppImage
+        if: runner.os == 'Linux'
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          ${{ steps.linuxdeploy.outputs.linuxdeploy }} \
+            --plugin=qt \
+            --output=appimage \
+            --create-desktop-file \
+            --executable=build/amnezia-list-updater \
+            --appdir=AppDir \
+            --icon-file=tools/amnezia-updater/assets/amnezia-list-updater.svg
+          APPIMAGE="$(find . -maxdepth 1 -type f -name '*.AppImage' ! -name 'linuxdeploy*' | head -n 1)"
+          test -n "$APPIMAGE"
+          mv "$APPIMAGE" amnezia-list-updater-linux-x86_64.AppImage
 
       - name: Package Windows portable build
         if: runner.os == 'Windows'
@@ -83,3 +106,10 @@ jobs:
         with:
           name: amnezia-list-updater-macos
           path: amnezia-list-updater-macos.dmg
+
+      - name: Upload Linux package
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v4
+        with:
+          name: amnezia-list-updater-linux-x86_64
+          path: amnezia-list-updater-linux-x86_64.AppImage
