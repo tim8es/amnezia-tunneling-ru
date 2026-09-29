@@ -578,8 +578,14 @@ bool Scheduler::install(const QString &programPath, QString &error)
     if (!writeBytesAtomically(plist, content, error))
         return false;
 
-    QProcess process;
     const QString domain = QStringLiteral("gui/%1").arg(static_cast<qulonglong>(geteuid()));
+
+    // Idempotent reinstall: unload an older registration first. Failure is
+    // harmless when the job was not loaded.
+    QProcess::execute(QStringLiteral("launchctl"),
+                      {QStringLiteral("bootout"), domain, plist});
+
+    QProcess process;
     process.start(QStringLiteral("launchctl"),
                   {QStringLiteral("bootstrap"), domain, plist});
     if (!process.waitForFinished(10000)) {
