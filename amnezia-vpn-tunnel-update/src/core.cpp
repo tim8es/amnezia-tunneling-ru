@@ -421,6 +421,16 @@ UpdateResult Updater::updateFromBytes(const QByteArray &json, bool amneziaRunnin
     if (!m_stateStore.load(state, error))
         return {UpdateStatus::Error, error, 0};
 
+    // Guard against a valid-but-broken upstream release that would otherwise
+    // remove a large portion of the previously managed list automatically.
+    if (state.managedDomains.size() >= 100
+        && parsed.sites.size() * 2 < state.managedDomains.size()) {
+        return {UpdateStatus::Error,
+                QStringLiteral("Refusing suspicious update: managed list would shrink from %1 to %2 entries.")
+                    .arg(state.managedDomains.size()).arg(parsed.sites.size()),
+                static_cast<int>(parsed.sites.size())};
+    }
+
     const QString hash = QString::fromLatin1(parsed.sha256);
     if (hash == state.sourceSha256 && state.pendingSha256.isEmpty())
         return {UpdateStatus::Unchanged, QStringLiteral("The domain list is already up to date."),
