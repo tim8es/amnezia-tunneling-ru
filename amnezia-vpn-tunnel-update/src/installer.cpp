@@ -58,6 +58,13 @@ bool copyManifestPackage(const QString &sourceDir, const QString &destinationDir
             return false;
     }
 
+    // Keep the manifest too so the installed copy can be run interactively
+    // and re-register itself later without depending on the original download.
+    const QString manifestDestination =
+        QDir(destinationDir).filePath(QStringLiteral("runtime.manifest"));
+    if (!copyFile(manifest.fileName(), manifestDestination, error))
+        return false;
+
     const QString exeName = QFileInfo(QCoreApplication::applicationFilePath()).fileName();
     programPath = QDir(destinationDir).filePath(exeName);
     if (!QFileInfo::exists(programPath)) {
