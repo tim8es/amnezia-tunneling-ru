@@ -1,4 +1,5 @@
 #include "core.h"
+#include "installer.h"
 
 #include <QApplication>
 #include <QCommandLineOption>
@@ -128,7 +129,12 @@ int main(int argc, char *argv[])
             return 1;
         }
         QString error;
-        if (!Scheduler::install(QCoreApplication::applicationFilePath(), error)) {
+        QString installedProgram;
+        if (!Installer::stageCurrentPackage(installedProgram, error)) {
+            qCritical().noquote() << error;
+            return 1;
+        }
+        if (!Scheduler::install(installedProgram, error)) {
             qCritical().noquote() << error;
             return 1;
         }
@@ -190,7 +196,15 @@ int main(int argc, char *argv[])
         }
 
         QString error;
-        if (!Scheduler::install(QCoreApplication::applicationFilePath(), error)) {
+        QString installedProgram;
+        if (!Installer::stageCurrentPackage(installedProgram, error)) {
+            enable->setEnabled(true);
+            QMessageBox::critical(&window, QStringLiteral("Ошибка"),
+                                  QStringLiteral("Список обновлён, но не удалось установить updater:\n%1")
+                                      .arg(error));
+            return;
+        }
+        if (!Scheduler::install(installedProgram, error)) {
             enable->setEnabled(true);
             QMessageBox::critical(&window, QStringLiteral("Ошибка"),
                                   QStringLiteral("Список обновлён, но не удалось включить расписание:\n%1")
