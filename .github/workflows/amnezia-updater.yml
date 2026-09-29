@@ -14,6 +14,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: amnezia-updater-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-test:
     strategy:
@@ -28,7 +32,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
-          version: "6.7.3"
+          version: "6.11.2"
           cache: true
 
       - name: Configure
