@@ -10,6 +10,8 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS Core Network Widgets Test)
 add_library(amnezia_updater_core
     src/core.cpp
     src/core.h
+    src/installer.cpp
+    src/installer.h
 )
 target_link_libraries(amnezia_updater_core PUBLIC Qt6::Core Qt6::Network)
 target_include_directories(amnezia_updater_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
