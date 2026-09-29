@@ -4,11 +4,11 @@ on:
   push:
     paths:
       - "amnezia-vpn-tunnel-update/**"
-      - ".github/workflows/amnezia-updater.yml"
+      - ".github/workflows/amnezia-vpn-tunnel-update.yml"
   pull_request:
     paths:
       - "amnezia-vpn-tunnel-update/**"
-      - ".github/workflows/amnezia-updater.yml"
+      - ".github/workflows/amnezia-vpn-tunnel-update.yml"
   workflow_dispatch:
 
 permissions:
