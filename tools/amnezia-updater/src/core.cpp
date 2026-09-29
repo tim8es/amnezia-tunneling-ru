@@ -407,7 +407,7 @@ UpdateResult Updater::applyParsed(const QByteArray &sourceJson,
     return {UpdateStatus::Updated,
             QStringLiteral("Updated %1 managed entries. Backup: %2")
                 .arg(parsed.sites.size()).arg(backupPath),
-            parsed.sites.size()};
+            static_cast<int>(parsed.sites.size())};
 }
 
 UpdateResult Updater::updateFromBytes(const QByteArray &json, bool amneziaRunning, const QString &etag)
@@ -424,7 +424,7 @@ UpdateResult Updater::updateFromBytes(const QByteArray &json, bool amneziaRunnin
     const QString hash = QString::fromLatin1(parsed.sha256);
     if (hash == state.sourceSha256 && state.pendingSha256.isEmpty())
         return {UpdateStatus::Unchanged, QStringLiteral("The domain list is already up to date."),
-                parsed.sites.size()};
+                static_cast<int>(parsed.sites.size())};
 
     if (amneziaRunning) {
         if (!m_stateStore.savePending(json, error))
@@ -436,7 +436,7 @@ UpdateResult Updater::updateFromBytes(const QByteArray &json, bool amneziaRunnin
             return {UpdateStatus::Error, error, 0};
         return {UpdateStatus::Pending,
                 QStringLiteral("A new list is ready and will be applied after Amnezia VPN exits."),
-                parsed.sites.size()};
+                static_cast<int>(parsed.sites.size())};
     }
 
     return applyParsed(json, parsed, state, etag);
